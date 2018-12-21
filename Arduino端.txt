@@ -1,0 +1,43 @@
+#include <LiquidCrystal.h>    //LCD屏的库
+LiquidCrystal lcd(7,6,5,4,3,2);  //定义脚位
+int buzzpin=8;//蜂鸣器脚位
+int ledpin=9; //led脚位
+
+void setup()
+{
+    Serial.begin(115200);    //设置串口通讯波特率
+    pinMode(buzzpin,OUTPUT);     //设置蜂鸣器脚位为输出
+    pinMode(ledpin,OUTPUT); //设置LED发光二极管脚位为输出
+	  lcd.begin(16,2); //设置LCD显示的数目。16 X 2：16格2行。
+    lcd.print("Air Quality is "); //将信息显示在LCD上 b
+}
+
+void loop()
+{
+    int val;    //定义整数变量val，用于接收传感器读取数值
+    val=analogRead(A0); //读取模拟串口A0的数值
+    Serial.println(val,DEC); //以十进制形式输出val的ASCII编码值，并同时跟随一个回车和换行符
+    delay(100); //延迟100毫秒
+    if (val>250){             //传感器数值根据实际环境不同会出现差异，请根据模块资料校准
+       lcd.clear();
+       lcd.print("Air Quality is "); //将信息显示在LCD上
+       lcd.setCursor(5,1);  //将闪烁的光标设置到column 5, line 1 (注释：从0开始数起，line 0是显示第一行，line 1是第二行。)
+       lcd.print("BAD ");
+       lcd.setCursor(10,1);  //将闪烁的光标设置到column 10, line 1 (注释：从0开始数起，line 0是显示第一行，line 1是第二行。)
+       lcd.print(val);
+       digitalWrite(buzzpin,HIGH); //设置蜂鸣器输出高电平，报警
+       digitalWrite(ledpin,HIGH);//设置LED输出高电平，报警
+       delay(500);
+       digitalWrite(buzzpin,LOW);//设置蜂鸣器输出低电平，停止
+       digitalWrite(ledpin,LOW);//设置蜂鸣器输出低电平，停止，达到闪烁效果
+    }else if(val<250){      
+        lcd.clear();
+        lcd.print("Air Quality is "); //将信息显示在LCD上
+        lcd.setCursor(5,1);  //将闪烁的光标设置到column 0, line 1 (注释：从0开始数起，line 0是显示第一行，line 1是第二行。)
+        lcd.print("GOOD");
+        lcd.setCursor(10,1);  //将闪烁的光标设置到column 0, line 1 (注释：从0开始数起，line 0是显示第一行，line 1是第二行。)
+        lcd.print(val);
+        digitalWrite(buzzpin,LOW);//设置蜂鸣器输出低电平，停止
+        digitalWrite(ledpin,LOW);//设置蜂鸣器输出低电平，停止
+      }
+}
